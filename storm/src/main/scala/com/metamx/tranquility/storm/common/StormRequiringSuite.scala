@@ -19,22 +19,22 @@
 
 package com.metamx.tranquility.storm.common
 
-import backtype.storm.LocalCluster
-import backtype.storm.generated.KillOptions
+
+import org.apache.storm.LocalCluster
+import org.apache.storm.generated.KillOptions
 import com.metamx.common.scala.Logging
 import com.metamx.common.scala.Predef._
 import com.metamx.common.scala.control._
 import org.scala_tools.time.Imports._
 import scala.collection.JavaConverters._
 
-trait StormRequiringSuite extends Logging
-{
+trait StormRequiringSuite extends Logging {
   def withLocalStorm[A](f: (LocalCluster => A)): A = {
     val storm = StormRequiringSuite.sharedCluster
     def killTopology(name: String) {
       retryOnErrors(ifException[Exception] untilPeriod 60.seconds) {
         log.info("Killing topology: %s", name)
-        storm.killTopologyWithOpts(name, new KillOptions() withEffect (_.set_wait_secs(0)))
+        storm.killTopologyWithOpts(name, new KillOptions() withEffect (_.set_wait_secs(30)))
       }
     }
     def getTopologies() = {
@@ -46,12 +46,13 @@ trait StormRequiringSuite extends Logging
     }
     def killAllTopologies() = {
       for (topology <- getTopologies()) {
+
         killTopology(topology.get_name())
       }
       val start = System.currentTimeMillis()
       while (getTopologies().nonEmpty && System.currentTimeMillis() < start + 60000L) {
         log.info("Waiting for topologies to die...")
-        Thread.sleep(2000)
+        Thread.sleep(3000)
       }
       val topologies = getTopologies()
       if (topologies.nonEmpty) {
@@ -68,7 +69,6 @@ trait StormRequiringSuite extends Logging
 
 }
 
-object StormRequiringSuite
-{
+object StormRequiringSuite {
   private lazy val sharedCluster: LocalCluster = new LocalCluster()
 }

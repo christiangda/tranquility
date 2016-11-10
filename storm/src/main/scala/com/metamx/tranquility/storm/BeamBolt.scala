@@ -18,32 +18,25 @@
  */
 package com.metamx.tranquility.storm
 
-import backtype.storm.task.OutputCollector
-import backtype.storm.task.TopologyContext
-import backtype.storm.topology.OutputFieldsDeclarer
-import backtype.storm.topology.base.BaseRichBolt
-import backtype.storm.tuple.Fields
-import backtype.storm.tuple.Tuple
-import com.metamx.common.scala.Logging
-import com.metamx.common.scala.concurrent.abortingThread
-import com.metamx.tranquility.beam.Beam
-import com.metamx.tranquility.tranquilizer.MessageDroppedException
-import com.metamx.tranquility.tranquilizer.Tranquilizer
-import com.twitter.util.Await
-import com.twitter.util.Future
 import java.{util => ju}
-import scala.collection.mutable.ArrayBuffer
+
+import com.metamx.common.scala.Logging
+import com.metamx.tranquility.tranquilizer.{MessageDroppedException, Tranquilizer}
+import org.apache.storm.task.{OutputCollector, TopologyContext}
+import org.apache.storm.topology.OutputFieldsDeclarer
+import org.apache.storm.topology.base.BaseRichBolt
+import org.apache.storm.tuple.{Fields, Tuple}
 
 /**
   * A Storm Bolt for using a Beam to propagate tuples.
   *
   * @param beamFactory Factory for creating the Beam we will use.
-  * @param batchSize Maximum number of events to send per call to Beam.propagate.
+  * @param batchSize   Maximum number of events to send per call to Beam.propagate.
   */
 class BeamBolt[EventType](
-  beamFactory: BeamFactory[EventType],
-  batchSize: Int
-) extends BaseRichBolt with Logging
+                           beamFactory: BeamFactory[EventType],
+                           batchSize: Int
+                         ) extends BaseRichBolt with Logging
 {
   def this(beamFactory: BeamFactory[EventType]) = this(beamFactory, 2000)
 
@@ -91,3 +84,4 @@ class BeamBolt[EventType](
     declarer.declare(new Fields())
   }
 }
+

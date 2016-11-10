@@ -19,12 +19,11 @@
 
 package com.metamx.tranquility.storm.common
 
-import backtype.storm.serialization.IKryoFactory
-import com.metamx.common.scala.Predef._
-import com.twitter.chill.Kryo
-import com.twitter.chill.KryoBase
-import com.twitter.chill.KryoSerializer
 import java.{util => ju}
+
+import com.metamx.common.scala.Predef._
+import com.twitter.chill.{Kryo, KryoBase, KryoSerializer}
+import org.apache.storm.serialization.IKryoFactory
 import org.objenesis.strategy.StdInstantiatorStrategy
 
 class SimpleKryoFactory extends IKryoFactory
@@ -47,3 +46,4 @@ class SimpleKryoFactory extends IKryoFactory
 
   def postDecorate(kryo: Kryo, conf: ju.Map[_, _]) {}
 }
+

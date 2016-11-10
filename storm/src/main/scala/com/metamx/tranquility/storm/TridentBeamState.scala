@@ -18,14 +18,15 @@
  */
 package com.metamx.tranquility.storm
 
-import backtype.storm.task.IMetricsContext
 import com.metamx.common.scala.Logging
 import com.metamx.tranquility.beam.Beam
 import com.twitter.util.Await
+import org.apache.storm.task.IMetricsContext
+import org.apache.storm.trident.operation.TridentCollector
+import org.apache.storm.trident.state.{BaseStateUpdater, State, StateFactory}
+import org.apache.storm.trident.tuple.TridentTuple
+
 import scala.collection.JavaConverters._
-import storm.trident.operation.TridentCollector
-import storm.trident.state.{StateFactory, BaseStateUpdater, State}
-import storm.trident.tuple.TridentTuple
 
 /**
  * A Trident State for using Beams to propagate tuples.
@@ -58,28 +59,28 @@ class TridentBeamStateFactory[EventType](beamFactory: BeamFactory[EventType])
   extends StateFactory with Logging
 {
   override def makeState(
-    conf: java.util.Map[_, _],
-    metrics: IMetricsContext,
-    partitionIndex: Int,
-    numPartitions: Int
-  ) = {
+                          conf: java.util.Map[_, _],
+                          metrics: IMetricsContext,
+                          partitionIndex: Int,
+                          numPartitions: Int
+                        ) = {
     new TridentBeamState(beamFactory.makeBeam(conf, metrics))
   }
 }
 
 /**
- * A Trident StateUpdater for use with BeamTridentStates.
- */
+  * A Trident StateUpdater for use with BeamTridentStates.
+  */
 class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamState[EventType]]
 {
   @transient
   @volatile private[this] var stateToCleanup: TridentBeamState[EventType] = null
 
   override def updateState(
-    state: TridentBeamState[EventType],
-    tuples: java.util.List[TridentTuple],
-    collector: TridentCollector
-  )
+                            state: TridentBeamState[EventType],
+                            tuples: java.util.List[TridentTuple],
+                            collector: TridentCollector
+                          )
   {
     // Not sure if these checks are necessary; can a StateUpdater be called from more than one thread?
     if (stateToCleanup == null) {

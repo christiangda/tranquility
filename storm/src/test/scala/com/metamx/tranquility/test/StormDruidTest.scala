@@ -18,35 +18,29 @@
  */
 package com.metamx.tranquility.test
 
-import backtype.storm.Config
-import backtype.storm.task.IMetricsContext
-import backtype.storm.topology.TopologyBuilder
+import java.{util => ju}
+
 import com.metamx.common.scala.Logging
 import com.metamx.common.scala.Predef._
 import com.metamx.common.scala.timekeeper.TestingTimekeeper
-import com.metamx.tranquility.storm.BeamBolt
-import com.metamx.tranquility.storm.BeamFactory
-import com.metamx.tranquility.storm.common.SimpleKryoFactory
-import com.metamx.tranquility.storm.common.SimpleSpout
-import com.metamx.tranquility.storm.common.StormRequiringSuite
+import com.metamx.tranquility.storm.{BeamBolt, BeamFactory}
+import com.metamx.tranquility.storm.common.{SimpleKryoFactory, StormRequiringSuite, SimpleSpout}
 import com.metamx.tranquility.test.StormDruidTest._
-import com.metamx.tranquility.test.common.CuratorRequiringSuite
-import com.metamx.tranquility.test.common.DruidIntegrationSuite
-import com.metamx.tranquility.test.common.JulUtils
-import java.{util => ju}
+import com.metamx.tranquility.test.common.{CuratorRequiringSuite, DruidIntegrationSuite, JulUtils}
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.BoundedExponentialBackoffRetry
+import org.apache.storm.Config
+import org.apache.storm.task.IMetricsContext
+import org.apache.storm.topology.TopologyBuilder
 import org.junit.runner.RunWith
 import org.scala_tools.time.Imports._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-object StormDruidTest
-{
+object StormDruidTest {
 
   def newBeamFactory(zkConnect: String, now: DateTime): BeamFactory[SimpleEvent] = {
-    new BeamFactory[SimpleEvent]
-    {
+    new BeamFactory[SimpleEvent] {
       override def makeBeam(conf: ju.Map[_, _], metrics: IMetricsContext) = {
         val aDifferentCurator = CuratorFrameworkFactory.newClient(
           zkConnect,
@@ -67,8 +61,7 @@ object StormDruidTest
 
 @RunWith(classOf[JUnitRunner])
 class StormDruidTest
-  extends FunSuite with DruidIntegrationSuite with CuratorRequiringSuite with StormRequiringSuite with Logging
-{
+  extends FunSuite with DruidIntegrationSuite with CuratorRequiringSuite with StormRequiringSuite with Logging {
 
   JulUtils.routeJulThroughSlf4j()
 

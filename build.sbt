@@ -1,6 +1,6 @@
-scalaVersion := "2.10.5"
+scalaVersion := "2.10.6"
 
-crossScalaVersions := Seq("2.10.5", "2.11.7")
+crossScalaVersions := Seq("2.10.6", "2.11.8")
 
 // Disable parallel execution, the various Druid oriented tests need to claim ports
 parallelExecution in ThisBuild := false
@@ -26,6 +26,8 @@ val jettyVersion = "9.2.5.v20141112"
 val apacheHttpVersion = "4.3.3"
 val kafkaVersion = "0.8.2.2"
 val airlineVersion = "0.7"
+val stormVersion = "1.0.2"
+val chillVersion = "0.8.1"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -82,19 +84,19 @@ val loggingDependencies = Seq(
 def flinkDependencies(scalaVersion: String) = {
   Seq(
     "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "optional"
-    exclude("log4j", "log4j")
-    exclude("org.slf4j", "slf4j-log4j12")
-    force()
+      exclude("log4j", "log4j")
+      exclude("org.slf4j", "slf4j-log4j12")
+      force()
   )
 }
 
 val stormDependencies = Seq(
-  "org.apache.storm" % "storm-core" % "0.9.3" % "optional"
-    exclude("javax.jms", "jms")
-    exclude("ch.qos.logback", "logback-classic")
-    exclude("org.slf4j", "log4j-over-slf4j")
+  "org.apache.storm" % "storm-core" % stormVersion % "optional"
+    exclude("ch.qos.logback","logback-classic")
+    exclude("org.apache.logging.log4j","log4j-slf4j-impl")
     force(),
-  "com.twitter" %% "chill" % "0.7.1" % "optional"
+  "org.slf4j" % "slf4j-api" % "1.7.21" % "optional",
+  "com.twitter" %% "chill" % "0.8.1" % "optional"
 )
 
 val samzaDependencies = Seq(
@@ -125,7 +127,7 @@ val kafkaDependencies = Seq(
 val coreTestDependencies = Seq(
   "org.scalatest" %% "scalatest" % "2.2.5" % "test",
   dependOnDruid("druid-services") % "test",
-  "org.apache.curator" % "curator-test" % "2.6.0" % "test" exclude("log4j", "log4j") force(),
+  "org.apache.curator" % "curator-test" % "2.11.0" % "test" exclude("log4j", "log4j") force(),
   "com.sun.jersey" % "jersey-servlet" % "1.17.1" % "test" force(),
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test",

@@ -19,23 +19,21 @@
 
 package com.metamx.tranquility.test
 
-import backtype.storm.Config
-import backtype.storm.task.IMetricsContext
-import backtype.storm.topology.TopologyBuilder
-import com.metamx.common.scala.Logging
-import com.metamx.tranquility.beam.Beam
-import com.metamx.tranquility.beam.SendResult
-import com.metamx.tranquility.storm.BeamBolt
-import com.metamx.tranquility.storm.BeamFactory
-import com.metamx.tranquility.storm.common.SimpleKryoFactory
-import com.metamx.tranquility.storm.common.SimpleSpout
-import com.metamx.tranquility.storm.common.StormRequiringSuite
-import com.metamx.tranquility.test.common.CuratorRequiringSuite
-import com.metamx.tranquility.test.common.JulUtils
-import com.twitter.util.Future
 import java.{util => ju}
+import javax.sound.midi.ShortMessage
+
+import com.metamx.common.scala.{Logging, process}
+import com.metamx.tranquility.beam.{Beam, SendResult}
+import com.metamx.tranquility.storm.common.{SimpleKryoFactory, SimpleSpout, StormRequiringSuite}
+import com.metamx.tranquility.storm.{BeamBolt, BeamFactory}
+import com.metamx.tranquility.test.common.{CuratorRequiringSuite, JulUtils}
+import com.twitter.util.Future
+import org.apache.storm.Config
+import org.apache.storm.task.IMetricsContext
+import org.apache.storm.topology.TopologyBuilder
 import org.scala_tools.time.Imports._
 import org.scalatest.FunSuite
+
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -71,21 +69,30 @@ class StormBoltTest extends FunSuite with CuratorRequiringSuite with StormRequir
       curator =>
         withLocalStorm {
           storm =>
+
             val inputs = Seq(
               new SimpleEvent(new DateTime("2010-01-01T02:03:04Z"), "what", 1, 2, 3),
               new SimpleEvent(new DateTime("2010-01-01T02:03:05Z"), "bar", 1, 2, 3)
             ).sortBy(_.ts.millis)
+
             val spout = SimpleSpout.create(inputs)
+
             val conf = new Config
             conf.setKryoFactory(classOf[SimpleKryoFactory])
+
             val builder = new TopologyBuilder
             builder.setSpout("events", spout)
-            builder.setBolt("beam", new BeamBolt[SimpleEvent](new SimpleBeamFactory)).shuffleGrouping("events")
-            storm.submitTopology("test", conf, builder.createTopology())
+
+            val bolt = new BeamBolt[SimpleEvent](new SimpleBeamFactory)
+            builder.setBolt("beam", bolt).shuffleGrouping("events")
+
+            storm.submitTopology("test", conf, builder.createTopology)
+
             val start = System.currentTimeMillis()
             while (SimpleBeam.sortedBuffer != inputs && System.currentTimeMillis() < start + 300000) {
-              Thread.sleep(2000)
+              Thread.sleep(1000)
             }
+
             assert(SimpleBeam.sortedBuffer === inputs)
         }
     }

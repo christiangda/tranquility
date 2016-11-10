@@ -18,11 +18,13 @@
  */
 package com.metamx.tranquility.storm
 
-import backtype.storm.task.IMetricsContext
-import com.metamx.tranquility.beam.Beam
 import java.{util => ju}
+
+import com.metamx.tranquility.beam.Beam
+import org.apache.storm.task.IMetricsContext
 
 trait BeamFactory[EventType] extends Serializable
 {
   def makeBeam(conf: ju.Map[_, _], metrics: IMetricsContext): Beam[EventType]
 }
+

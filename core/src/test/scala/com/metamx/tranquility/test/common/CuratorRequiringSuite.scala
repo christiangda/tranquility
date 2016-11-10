@@ -33,7 +33,7 @@ trait CuratorRequiringSuite
     withZkCluster {
       connectString =>
         CuratorFrameworkFactory
-          .newClient(connectString, new BoundedExponentialBackoffRetry(100, 1000, 5))
+          .newClient(connectString, new BoundedExponentialBackoffRetry(500, 5000, 5))
           .withFinally(_.close()) {
           curator =>
             curator.start()

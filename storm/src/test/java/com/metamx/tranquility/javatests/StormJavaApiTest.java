@@ -19,7 +19,6 @@
 
 package com.metamx.tranquility.javatests;
 
-import backtype.storm.task.IMetricsContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
@@ -42,6 +41,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.curator.test.TestingCluster;
+import org.apache.storm.task.IMetricsContext;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -56,114 +56,114 @@ import java.util.Map;
 
 public class StormJavaApiTest
 {
-  private static final List<String> dimensions = ImmutableList.of("column");
-  private static final List<AggregatorFactory> aggregators = ImmutableList.<AggregatorFactory>of(
-      new CountAggregatorFactory(
-          "cnt"
-      )
-  );
+    private static final List<String> dimensions = ImmutableList.of("column");
+    private static final List<AggregatorFactory> aggregators = ImmutableList.<AggregatorFactory>of(
+            new CountAggregatorFactory(
+                    "cnt"
+            )
+    );
 
-  public static class MyBeamFactory implements BeamFactory<Map<String, Object>>
-  {
-    @Override
-    public Beam<Map<String, Object>> makeBeam(Map<?, ?> conf, IMetricsContext metrics)
+    public static class MyBeamFactory implements BeamFactory<Map<String, Object>>
     {
-      try (
-          final TestingCluster cluster = new TestingCluster(1);
-          final CuratorFramework curator = CuratorFrameworkFactory.builder()
-                                                                  .connectString(cluster.getConnectString())
-                                                                  .retryPolicy(
-                                                                      new RetryOneTime(1000)
-                                                                  )
-                                                                  .build()
-      ) {
-        cluster.start();
-        curator.start();
+        @Override
+        public Beam<Map<String, Object>> makeBeam(Map<?, ?> conf, IMetricsContext metrics)
+        {
+            try (
+                    final TestingCluster cluster = new TestingCluster(1);
+                    final CuratorFramework curator = CuratorFrameworkFactory.builder()
+                            .connectString(cluster.getConnectString())
+                            .retryPolicy(
+                                    new RetryOneTime(1000)
+                            )
+                            .build()
+            ) {
+                cluster.start();
+                curator.start();
 
-        final String dataSource = "hey";
+                final String dataSource = "hey";
 
-        final DruidBeams.Builder<Map<String, Object>, Map<String, Object>> builder = DruidBeams
-            .builder(
-                new Timestamper<Map<String, Object>>()
-                {
-                  @Override
-                  public DateTime timestamp(Map<String, Object> theMap)
-                  {
-                    return new DateTime(theMap.get("timestamp"));
-                  }
-                }
-            )
-            .curator(curator)
-            .discoveryPath("/test/discovery")
-            .location(
-                DruidLocation.create(
-                    "druid:local:indexer",
-                    "druid:local:firehose:%s",
-                    dataSource
-                )
-            )
-            .rollup(DruidRollup.create(dimensions, aggregators, QueryGranularities.MINUTE))
-            .tuning(
-                ClusteredBeamTuning.builder()
-                                   .segmentGranularity(Granularity.HOUR)
-                                   .windowPeriod(new Period("PT10M"))
-                                   .build()
-            )
-            .objectWriter(
-                new JavaObjectWriter<Map<String, Object>>()
-                {
-                  final ObjectMapper objectMapper = new ObjectMapper();
+                final DruidBeams.Builder<Map<String, Object>, Map<String, Object>> builder = DruidBeams
+                        .builder(
+                                new Timestamper<Map<String, Object>>()
+                                {
+                                    @Override
+                                    public DateTime timestamp(Map<String, Object> theMap)
+                                    {
+                                        return new DateTime(theMap.get("timestamp"));
+                                    }
+                                }
+                        )
+                        .curator(curator)
+                        .discoveryPath("/test/discovery")
+                        .location(
+                                DruidLocation.create(
+                                        "druid:local:indexer",
+                                        "druid:local:firehose:%s",
+                                        dataSource
+                                )
+                        )
+                        .rollup(DruidRollup.create(dimensions, aggregators, QueryGranularities.MINUTE))
+                        .tuning(
+                                ClusteredBeamTuning.builder()
+                                        .segmentGranularity(Granularity.HOUR)
+                                        .windowPeriod(new Period("PT10M"))
+                                        .build()
+                        )
+                        .objectWriter(
+                                new JavaObjectWriter<Map<String, Object>>()
+                                {
+                                    final ObjectMapper objectMapper = new ObjectMapper();
 
-                  @Override
-                  public byte[] asBytes(Map<String, Object> obj)
-                  {
-                    try {
-                      return objectMapper.writeValueAsBytes(obj);
-                    }
-                    catch (JsonProcessingException e) {
-                      throw Throwables.propagate(e);
-                    }
-                  }
+                                    @Override
+                                    public byte[] asBytes(Map<String, Object> obj)
+                                    {
+                                        try {
+                                            return objectMapper.writeValueAsBytes(obj);
+                                        }
+                                        catch (JsonProcessingException e) {
+                                            throw Throwables.propagate(e);
+                                        }
+                                    }
 
-                  @Override
-                  public byte[] batchAsBytes(Iterator<Map<String, Object>> objects)
-                  {
-                    try {
-                      return objectMapper.writeValueAsBytes(ImmutableList.of(objects));
-                    }
-                    catch (JsonProcessingException e) {
-                      throw Throwables.propagate(e);
-                    }
-                  }
+                                    @Override
+                                    public byte[] batchAsBytes(Iterator<Map<String, Object>> objects)
+                                    {
+                                        try {
+                                            return objectMapper.writeValueAsBytes(ImmutableList.of(objects));
+                                        }
+                                        catch (JsonProcessingException e) {
+                                            throw Throwables.propagate(e);
+                                        }
+                                    }
 
-                  @Override
-                  public String contentType()
-                  {
-                    return MediaType.APPLICATION_JSON;
-                  }
-                }
-            );
+                                    @Override
+                                    public String contentType()
+                                    {
+                                        return MediaType.APPLICATION_JSON;
+                                    }
+                                }
+                        );
 
-        final Service<List<Map<String, Object>>, Integer> service = builder.buildJavaService();
-        Assert.assertNotNull(service);
-        final Beam<Map<String, Object>> beam = builder.buildBeam();
-        Assert.assertNotNull(beam);
-        return beam;
-      }
-      catch (Exception e) {
-        throw Throwables.propagate(e);
-      }
+                final Service<List<Map<String, Object>>, Integer> service = builder.buildJavaService();
+                Assert.assertNotNull(service);
+                final Beam<Map<String, Object>> beam = builder.buildBeam();
+                Assert.assertNotNull(beam);
+                return beam;
+            }
+            catch (Exception e) {
+                throw Throwables.propagate(e);
+            }
+        }
     }
-  }
 
-  @Test
-  public void testDruidBeamBoltConstruction() throws Exception
-  {
-    final BeamBolt<Map<String, Object>> beamBolt = new BeamBolt<>(new MyBeamFactory());
+    @Test
+    public void testDruidBeamBoltConstruction() throws Exception
+    {
+        final BeamBolt<Map<String, Object>> beamBolt = new BeamBolt<>(new MyBeamFactory());
 
-    // Ensure serializability
-    final ObjectOutputStream objectOutputStream = new ObjectOutputStream(new ByteArrayOutputStream());
-    objectOutputStream.writeObject(beamBolt);
-    Assert.assertTrue(true);
-  }
+        // Ensure serializability
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(new ByteArrayOutputStream());
+        objectOutputStream.writeObject(beamBolt);
+        Assert.assertTrue(true);
+    }
 }
