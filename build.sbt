@@ -10,8 +10,6 @@ parallelExecution in Test := false
 
 concurrentRestrictions in Global += Tags.limitAll(1)
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
-
 val jacksonOneVersion = "1.9.13"
 // See https://github.com/druid-io/druid/pull/1669, https://github.com/druid-io/tranquility/pull/81 before upgrading Jackson
 val jacksonTwoVersion = "2.4.6"
