@@ -20,9 +20,8 @@
 package com.metamx.tranquility.test
 
 import java.{util => ju}
-import javax.sound.midi.ShortMessage
 
-import com.metamx.common.scala.{Logging, process}
+import com.metamx.common.scala.Logging
 import com.metamx.tranquility.beam.{Beam, SendResult}
 import com.metamx.tranquility.storm.common.{SimpleKryoFactory, SimpleSpout, StormRequiringSuite}
 import com.metamx.tranquility.storm.{BeamBolt, BeamFactory}
@@ -37,8 +36,7 @@ import org.scalatest.FunSuite
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class SimpleBeam extends Beam[SimpleEvent]
-{
+class SimpleBeam extends Beam[SimpleEvent] {
   override def sendAll(messages: Seq[SimpleEvent]): Seq[Future[SendResult]] = {
     SimpleBeam.buffer ++= messages
     messages.map(_ => Future(SendResult.Sent))
@@ -47,20 +45,17 @@ class SimpleBeam extends Beam[SimpleEvent]
   override def close() = Future.Done
 }
 
-object SimpleBeam
-{
+object SimpleBeam {
   val buffer = new ArrayBuffer[SimpleEvent] with mutable.SynchronizedBuffer[SimpleEvent]
 
   def sortedBuffer = buffer.sortBy(_.ts.millis).toList
 }
 
-class SimpleBeamFactory extends BeamFactory[SimpleEvent]
-{
+class SimpleBeamFactory extends BeamFactory[SimpleEvent] {
   def makeBeam(conf: ju.Map[_, _], metrics: IMetricsContext) = new SimpleBeam
 }
 
-class StormBoltTest extends FunSuite with CuratorRequiringSuite with StormRequiringSuite with Logging
-{
+class StormBoltTest extends FunSuite with CuratorRequiringSuite with StormRequiringSuite with Logging {
 
   JulUtils.routeJulThroughSlf4j()
 
@@ -86,9 +81,11 @@ class StormBoltTest extends FunSuite with CuratorRequiringSuite with StormRequir
             val bolt = new BeamBolt[SimpleEvent](new SimpleBeamFactory)
             builder.setBolt("beam", bolt).shuffleGrouping("events")
 
-            storm.submitTopology("test", conf, builder.createTopology)
+            val topology = builder.createTopology
+            storm.submitTopology("test", conf, topology)
 
             val start = System.currentTimeMillis()
+
             while (SimpleBeam.sortedBuffer != inputs && System.currentTimeMillis() < start + 300000) {
               Thread.sleep(1000)
             }
@@ -97,5 +94,4 @@ class StormBoltTest extends FunSuite with CuratorRequiringSuite with StormRequir
         }
     }
   }
-
 }
