@@ -46,11 +46,11 @@ class TridentBeamState[EventType](beam: Beam[EventType])
     Await.result(beam.close())
   }
 
-  override def beginCommit(txid: java.lang.Long) {
+  override def beginCommit(txid: java.lang.Long): Unit = {
     this.txid = Some(txid)
   }
 
-  override def commit(txid: java.lang.Long) {
+  override def commit(txid: java.lang.Long): Unit = {
     this.txid = None
   }
 }
@@ -74,13 +74,13 @@ class TridentBeamStateFactory[EventType](beamFactory: BeamFactory[EventType])
 class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamState[EventType]]
 {
   @transient
-  @volatile private[this] var stateToCleanup: TridentBeamState[EventType] = null
+  @volatile private[this] var stateToCleanup: TridentBeamState[EventType] = _
 
   override def updateState(
                             state: TridentBeamState[EventType],
                             tuples: java.util.List[TridentTuple],
                             collector: TridentCollector
-                          )
+                          ) =
   {
     // Not sure if these checks are necessary; can a StateUpdater be called from more than one thread?
     if (stateToCleanup == null) {
@@ -98,7 +98,7 @@ class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamSta
     state.send(tuples.asScala map (tuple => tuple.getValue(0).asInstanceOf[EventType]))
   }
 
-  override def cleanup() {
+  override def cleanup(): Unit = {
     Option(stateToCleanup) foreach (_.close())
   }
 }

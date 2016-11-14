@@ -41,10 +41,10 @@ class BeamBolt[EventType](
   def this(beamFactory: BeamFactory[EventType]) = this(beamFactory, 2000)
 
   @volatile private var running     : Boolean                 = false
-  @volatile private var collector   : OutputCollector         = null
-  @volatile private var tranquilizer: Tranquilizer[EventType] = null
+  @volatile private var collector   : OutputCollector         = _
+  @volatile private var tranquilizer: Tranquilizer[EventType] = _
 
-  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector) {
+  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector): Unit = {
     require(this.collector == null, "WTF?! Already initialized, but prepare was called anyway.")
     this.collector = collector
     this.tranquilizer = Tranquilizer.create(
@@ -57,7 +57,7 @@ class BeamBolt[EventType](
     running = true
   }
 
-  override def execute(tuple: Tuple) {
+  override def execute(tuple: Tuple): Unit = {
     tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess { res =>
       collector.synchronized {
         collector.ack(tuple)
@@ -75,12 +75,12 @@ class BeamBolt[EventType](
     }
   }
 
-  override def cleanup() {
+  override def cleanup(): Unit = {
     running = false
     tranquilizer.stop()
   }
 
-  override def declareOutputFields(declarer: OutputFieldsDeclarer) {
+  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {
     declarer.declare(new Fields())
   }
 }

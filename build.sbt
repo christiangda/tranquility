@@ -164,7 +164,7 @@ val kafkaTestDependencies = Seq(
 lazy val commonSettings = Seq(
   organization := "io.druid",
 
-  javaOptions := Seq("-Xms512m", "-Xmx512m", "-XX:MaxPermSize=256M"),
+  javaOptions := Seq("-Xms512m", "-Xmx512m", "-XX:MaxPermSize=512M"),
 
   // Target Java 7
   scalacOptions += "-target:jvm-1.7",
