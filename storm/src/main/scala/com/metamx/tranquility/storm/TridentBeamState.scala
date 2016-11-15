@@ -27,13 +27,13 @@ import org.apache.storm.trident.state.{BaseStateUpdater, State, StateFactory}
 import org.apache.storm.trident.tuple.TridentTuple
 
 import scala.collection.JavaConverters._
+import scala.language.implicitConversions
+
 
 /**
- * A Trident State for using Beams to propagate tuples.
- */
-class TridentBeamState[EventType](beam: Beam[EventType])
-  extends State with Logging
-{
+  * A Trident State for using Beams to propagate tuples.
+  */
+class TridentBeamState[EventType](beam: Beam[EventType]) extends State with Logging {
   // We could use this to provide exactly-once semantics one day.
   var txid: Option[Long] = None
 
@@ -46,18 +46,18 @@ class TridentBeamState[EventType](beam: Beam[EventType])
     Await.result(beam.close())
   }
 
-  override def beginCommit(txid: java.lang.Long): Unit = {
+  override def beginCommit(txid: java.lang.Long) {
     this.txid = Some(txid)
   }
 
-  override def commit(txid: java.lang.Long): Unit = {
+  override def commit(txid: java.lang.Long) {
     this.txid = None
   }
 }
 
 class TridentBeamStateFactory[EventType](beamFactory: BeamFactory[EventType])
-  extends StateFactory with Logging
-{
+  extends StateFactory with Logging {
+
   override def makeState(
                           conf: java.util.Map[_, _],
                           metrics: IMetricsContext,
@@ -66,13 +66,13 @@ class TridentBeamStateFactory[EventType](beamFactory: BeamFactory[EventType])
                         ) = {
     new TridentBeamState(beamFactory.makeBeam(conf, metrics))
   }
+
 }
 
 /**
   * A Trident StateUpdater for use with BeamTridentStates.
   */
-class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamState[EventType]]
-{
+class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamState[EventType]] {
   @transient
   @volatile private[this] var stateToCleanup: TridentBeamState[EventType] = _
 
@@ -80,8 +80,7 @@ class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamSta
                             state: TridentBeamState[EventType],
                             tuples: java.util.List[TridentTuple],
                             collector: TridentCollector
-                          ) =
-  {
+                          ) = {
     // Not sure if these checks are necessary; can a StateUpdater be called from more than one thread?
     if (stateToCleanup == null) {
       synchronized {
@@ -98,7 +97,7 @@ class TridentBeamStateUpdater[EventType] extends BaseStateUpdater[TridentBeamSta
     state.send(tuples.asScala map (tuple => tuple.getValue(0).asInstanceOf[EventType]))
   }
 
-  override def cleanup(): Unit = {
+  override def cleanup() {
     Option(stateToCleanup) foreach (_.close())
   }
 }

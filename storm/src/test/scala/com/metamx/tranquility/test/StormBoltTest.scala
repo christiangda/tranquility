@@ -41,13 +41,11 @@ class SimpleBeam extends Beam[SimpleEvent] {
     SimpleBeam.buffer ++= messages
     messages.map(_ => Future(SendResult.Sent))
   }
-
   override def close() = Future.Done
 }
 
 object SimpleBeam {
   val buffer = new ArrayBuffer[SimpleEvent] with mutable.SynchronizedBuffer[SimpleEvent]
-
   def sortedBuffer = buffer.sortBy(_.ts.millis).toList
 }
 

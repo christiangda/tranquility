@@ -25,7 +25,9 @@ import com.metamx.tranquility.tranquilizer.{MessageDroppedException, Tranquilize
 import org.apache.storm.task.{OutputCollector, TopologyContext}
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichBolt
-import org.apache.storm.tuple.{Fields, Tuple}
+import org.apache.storm.tuple.Tuple
+
+import scala.language.implicitConversions
 
 /**
   * A Storm Bolt for using a Beam to propagate tuples.
@@ -36,16 +38,15 @@ import org.apache.storm.tuple.{Fields, Tuple}
 class BeamBolt[EventType](
                            beamFactory: BeamFactory[EventType],
                            batchSize: Int
-                         ) extends BaseRichBolt with Logging
-{
+                         ) extends BaseRichBolt with Logging {
+
   def this(beamFactory: BeamFactory[EventType]) = this(beamFactory, 2000)
 
-  @volatile private var running     : Boolean                 = false
-  @volatile private var collector   : OutputCollector         = _
+  @volatile private var running: Boolean = false
+  @volatile private var collector: OutputCollector = _
   @volatile private var tranquilizer: Tranquilizer[EventType] = _
 
-  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector): Unit = {
-    require(this.collector == null, "WTF?! Already initialized, but prepare was called anyway.")
+  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector) {
     this.collector = collector
     this.tranquilizer = Tranquilizer.create(
       beamFactory.makeBeam(conf, context),
@@ -54,14 +55,15 @@ class BeamBolt[EventType](
       Tranquilizer.DefaultLingerMillis
     )
     this.tranquilizer.start()
-    running = true
+    this.running = true
   }
 
-  override def execute(tuple: Tuple): Unit = {
-    tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess { res =>
-      collector.synchronized {
-        collector.ack(tuple)
-      }
+  override def execute(tuple: Tuple) {
+    tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
+      res =>
+        collector.synchronized {
+          collector.ack(tuple)
+        }
     } onFailure {
       case e: MessageDroppedException =>
         collector.synchronized {
@@ -75,13 +77,11 @@ class BeamBolt[EventType](
     }
   }
 
-  override def cleanup(): Unit = {
-    running = false
+  override def cleanup() {
+    this.running = false
     tranquilizer.stop()
   }
 
-  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {
-    declarer.declare(new Fields())
-  }
+  override def declareOutputFields(declarer: OutputFieldsDeclarer) {}
 }
 
