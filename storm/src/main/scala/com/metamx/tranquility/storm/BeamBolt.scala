@@ -58,7 +58,7 @@ class BeamBolt[EventType](
     this.running = true
   }
 
-  override def execute(tuple: Tuple): Unit = {
+  override def execute(tuple: Tuple) {
     val future = tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
       res =>
         collector.synchronized {
