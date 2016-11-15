@@ -22,6 +22,7 @@ import java.{util => ju}
 
 import com.metamx.common.scala.Logging
 import com.metamx.tranquility.tranquilizer.{MessageDroppedException, Tranquilizer}
+import com.twitter.util.Future
 import org.apache.storm.task.{OutputCollector, TopologyContext}
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichBolt
@@ -46,7 +47,7 @@ class BeamBolt[EventType](
   @volatile private var collector: OutputCollector = _
   @volatile private var tranquilizer: Tranquilizer[EventType] = _
 
-  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector) {
+  override def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector): Unit = {
     this.collector = collector
     this.tranquilizer = Tranquilizer.create(
       beamFactory.makeBeam(conf, context),
@@ -58,7 +59,7 @@ class BeamBolt[EventType](
     this.running = true
   }
 
-  override def execute(tuple: Tuple) {
+  override def execute(tuple: Tuple): Future[Unit] = {
     tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
       res =>
         collector.synchronized {
@@ -77,11 +78,11 @@ class BeamBolt[EventType](
     }
   }
 
-  override def cleanup() {
+  override def cleanup(): Unit = {
     this.running = false
     tranquilizer.stop()
   }
 
-  override def declareOutputFields(declarer: OutputFieldsDeclarer) {}
+  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {}
 }
 
