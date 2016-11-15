@@ -25,9 +25,7 @@ import com.metamx.tranquility.tranquilizer.{MessageDroppedException, Tranquilize
 import org.apache.storm.task.{OutputCollector, TopologyContext}
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichBolt
-import org.apache.storm.tuple.Tuple
-
-import scala.language.implicitConversions
+import org.apache.storm.tuple.{Fields, Tuple}
 
 /**
   * A Storm Bolt for using a Beam to propagate tuples.
@@ -58,8 +56,8 @@ class BeamBolt[EventType](
     this.running = true
   }
 
-  override def execute(tuple: Tuple) {
-    val future = tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
+  override def execute(tuple: Tuple): Unit = {
+    tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
       res =>
         collector.synchronized {
           collector.ack(tuple)
@@ -82,6 +80,8 @@ class BeamBolt[EventType](
     tranquilizer.stop()
   }
 
-  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {}
+  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {
+    declarer.declare(new Fields())
+  }
 }
 
