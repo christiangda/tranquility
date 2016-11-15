@@ -46,10 +46,10 @@ class BeamBolt[EventType](
   @volatile private var collector: OutputCollector = _
   @volatile private var tranquilizer: Tranquilizer[EventType] = _
 
-  def prepare(conf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector): Unit = {
+  override def prepare(stormConf: ju.Map[_, _], context: TopologyContext, collector: OutputCollector): Unit = {
     this.collector = collector
     this.tranquilizer = Tranquilizer.create(
-      beamFactory.makeBeam(conf, context),
+      beamFactory.makeBeam(stormConf, context),
       batchSize,
       Tranquilizer.DefaultMaxPendingBatches,
       Tranquilizer.DefaultLingerMillis
@@ -58,8 +58,8 @@ class BeamBolt[EventType](
     this.running = true
   }
 
-  def execute(tuple: Tuple): Unit = {
-    tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
+  override def execute(tuple: Tuple): Unit = {
+    val future = tranquilizer.send(tuple.getValue(0).asInstanceOf[EventType]) onSuccess {
       res =>
         collector.synchronized {
           collector.ack(tuple)
@@ -82,6 +82,6 @@ class BeamBolt[EventType](
     tranquilizer.stop()
   }
 
-  def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {}
+  override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {}
 }
 
