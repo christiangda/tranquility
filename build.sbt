@@ -28,6 +28,9 @@ val kafkaVersion = "0.8.2.2"
 val airlineVersion = "0.7"
 val stormVersion = "1.0.2"
 val chillVersion = "0.8.1"
+val googleGuavaVersion = "18.0"
+val metamxJavaUtil = "0.27.9"
+val metamxScalaUtil = "1.11.6"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -42,8 +45,8 @@ def dependOnDruid(artifact: String) = {
 }
 
 val coreDependencies = Seq(
-  "com.metamx" %% "scala-util" % "1.11.6" exclude("log4j", "log4j") force(),
-  "com.metamx" % "java-util" % "0.27.4" exclude("log4j", "log4j") force(),
+  "com.metamx" %% "scala-util" % metamxScalaUtil exclude("log4j", "log4j") force(),
+  "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j") force(),
   "io.netty" % "netty" % "3.10.5.Final" force(),
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
   "com.twitter" %% "finagle-core" % finagleVersion force(),
@@ -63,7 +66,8 @@ val coreDependencies = Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion force(),
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion force(),
   "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force()
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force(),
+  "com.google.guava" % "guava" % googleGuavaVersion force()
 ) ++ Seq(
   dependOnDruid("druid-server"),
   "com.google.inject" % "guice" % guiceVersion force(),
