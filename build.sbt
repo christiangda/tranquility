@@ -31,6 +31,8 @@ val chillVersion = "0.8.1"
 val googleGuavaVersion = "18.0"
 val metamxJavaUtil = "0.27.9"
 val metamxScalaUtil = "1.11.6"
+val slf4jVersion = "1.7.21"
+val logbackVersion = "1.1.2"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -51,8 +53,8 @@ val coreDependencies = Seq(
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
   "com.twitter" %% "finagle-core" % finagleVersion force(),
   "com.twitter" %% "finagle-http" % finagleVersion force(),
-  "org.slf4j" % "slf4j-api" % "1.7.12" force() force(),
-  "org.slf4j" % "jul-to-slf4j" % "1.7.12" force() force(),
+  "org.slf4j" % "slf4j-api" % slf4jVersion force() force(),
+  "org.slf4j" % "jul-to-slf4j" % slf4jVersion force() force(),
   "org.apache.httpcomponents" % "httpclient" % apacheHttpVersion force(),
   "org.apache.httpcomponents" % "httpcore" % apacheHttpVersion force(),
 
@@ -77,12 +79,12 @@ val coreDependencies = Seq(
 )
 
 val loggingDependencies = Seq(
-  "ch.qos.logback" % "logback-core" % "1.1.2",
-  "ch.qos.logback" % "logback-classic" % "1.1.2",
+  "ch.qos.logback" % "logback-core" % logbackVersion,
+  "ch.qos.logback" % "logback-classic" % logbackVersion,
   "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.4",
   "org.apache.logging.log4j" % "log4j-api" % "2.4",
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.12",
-  "org.slf4j" % "jul-to-slf4j" % "1.7.12"
+  "org.slf4j" % "log4j-over-slf4j" % slf4jVersion,
+  "org.slf4j" % "jul-to-slf4j" % slf4jVersion
 )
 
 def flinkDependencies(scalaVersion: String) = {
@@ -99,7 +101,7 @@ val stormDependencies = Seq(
     exclude("ch.qos.logback","logback-classic")
     exclude("org.apache.logging.log4j","log4j-slf4j-impl")
     force(),
-  "org.slf4j" % "slf4j-api" % "1.7.21" % "optional",
+  "org.slf4j" % "slf4j-api" % slf4jVersion % "optional",
   "com.twitter" %% "chill" % "0.8.1" % "optional"
 )
 
@@ -135,12 +137,12 @@ val coreTestDependencies = Seq(
   "com.sun.jersey" % "jersey-servlet" % "1.17.1" % "test" force(),
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test",
-  "ch.qos.logback" % "logback-core" % "1.1.2" % "test",
-  "ch.qos.logback" % "logback-classic" % "1.1.2" % "test",
+  "ch.qos.logback" % "logback-core" % logbackVersion % "test",
+  "ch.qos.logback" % "logback-classic" % logbackVersion % "test",
   "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.4" % "test",
   "org.apache.logging.log4j" % "log4j-api" % "2.4" % "test",
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.12" % "test",
-  "org.slf4j" % "jul-to-slf4j" % "1.7.12" % "test"
+  "org.slf4j" % "log4j-over-slf4j" % slf4jVersion % "test",
+  "org.slf4j" % "jul-to-slf4j" % slf4jVersion % "test"
 ) ++ loggingDependencies.map(_ % "test")
 
 def flinkTestDependencies(scalaVersion: String) = {
