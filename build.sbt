@@ -31,8 +31,10 @@ val chillVersion = "0.8.1"
 val googleGuavaVersion = "18.0"
 val metamxJavaUtil = "0.27.9"
 val metamxScalaUtil = "1.11.6"
+
 val slf4jVersion = "1.7.21"
-val logbackVersion = "1.1.2"
+val logbackVersion = "1.1.7"
+val loggingLog4jVersion = "2.7"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -42,7 +44,7 @@ def dependOnDruid(artifact: String) = {
     exclude("org.apache.logging.log4j", "log4j-api")
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
     exclude("org.apache.logging.log4j", "log4j-1.2-api")
-    //exclude("com.lmax", "disruptor") // Pulled in by log4j2, conflicts with the one Storm wants.
+    exclude("javax.validation", "validation-api")
     force())
 }
 
@@ -81,8 +83,8 @@ val coreDependencies = Seq(
 val loggingDependencies = Seq(
   "ch.qos.logback" % "logback-core" % logbackVersion,
   "ch.qos.logback" % "logback-classic" % logbackVersion,
-  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.4",
-  "org.apache.logging.log4j" % "log4j-api" % "2.4",
+  "org.apache.logging.log4j" % "log4j-to-slf4j" % loggingLog4jVersion,
+  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion,
   "org.slf4j" % "log4j-over-slf4j" % slf4jVersion,
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion
 )
@@ -139,8 +141,8 @@ val coreTestDependencies = Seq(
   "com.novocode" % "junit-interface" % "0.11" % "test",
   "ch.qos.logback" % "logback-core" % logbackVersion % "test",
   "ch.qos.logback" % "logback-classic" % logbackVersion % "test",
-  "org.apache.logging.log4j" % "log4j-to-slf4j" % "2.4" % "test",
-  "org.apache.logging.log4j" % "log4j-api" % "2.4" % "test",
+  "org.apache.logging.log4j" % "log4j-to-slf4j" % loggingLog4jVersion % "test",
+  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion % "test",
   "org.slf4j" % "log4j-over-slf4j" % slf4jVersion % "test",
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion % "test"
 ) ++ loggingDependencies.map(_ % "test")
