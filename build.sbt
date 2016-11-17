@@ -36,6 +36,8 @@ val slf4jVersion = "1.7.21"
 val logbackVersion = "1.1.7"
 val loggingLog4jVersion = "2.7"
 
+val javaxValidationVersion = "1.1.0.Final"
+
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
     exclude("org.slf4j", "slf4j-log4j12")
@@ -45,12 +47,20 @@ def dependOnDruid(artifact: String) = {
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
     exclude("org.apache.logging.log4j", "log4j-1.2-api")
     exclude("javax.validation", "validation-api")
-    force())
+    exclude("com.google.inject.extensions", "guice-servlet")
+    exclude("com.google.inject.extensions", "guice-multibindings")
+    exclude("com.google.guava", "guava")
+    force()
+    )
 }
 
 val coreDependencies = Seq(
-  "com.metamx" %% "scala-util" % metamxScalaUtil exclude("log4j", "log4j") force(),
-  "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j") force(),
+  "com.metamx" %% "scala-util" % metamxScalaUtil exclude("log4j", "log4j")
+    exclude("javax.validation", "validation-api")
+    force(),
+  "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j")
+    exclude("javax.validation", "validation-api")
+    force(),
   "io.netty" % "netty" % "3.10.5.Final" force(),
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
   "com.twitter" %% "finagle-core" % finagleVersion force(),
@@ -70,14 +80,14 @@ val coreDependencies = Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion force(),
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion force(),
   "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force(),
-  "com.google.guava" % "guava" % googleGuavaVersion force()
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force()
 ) ++ Seq(
   dependOnDruid("druid-server"),
   "com.google.inject" % "guice" % guiceVersion force(),
   "com.google.inject.extensions" % "guice-servlet" % guiceVersion force(),
   "com.google.inject.extensions" % "guice-multibindings" % guiceVersion force(),
-  "javax.validation" % "validation-api" % "1.1.0.Final" force()
+  "com.google.guava" % "guava" % googleGuavaVersion force(),
+  "javax.validation" % "validation-api" % javaxValidationVersion force()
 )
 
 val loggingDependencies = Seq(
@@ -121,7 +131,8 @@ val sparkDependencies = Seq(
 val serverDependencies = Seq(
   "org.scalatra" %% "scalatra" % scalatraVersion,
   "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
+  "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+  "javax.validation" % "validation-api" % javaxValidationVersion force()
 ) ++ loggingDependencies
 
 val kafkaDependencies = Seq(
