@@ -50,6 +50,8 @@ def dependOnDruid(artifact: String) = {
     exclude("com.google.inject.extensions", "guice-servlet")
     exclude("com.google.inject.extensions", "guice-multibindings")
     exclude("com.google.guava", "guava")
+    exclude("com.twitter", "finagle-core")
+    exclude("com.twitter", "finagle-http")
     force()
     )
 }
@@ -57,9 +59,13 @@ def dependOnDruid(artifact: String) = {
 val coreDependencies = Seq(
   "com.metamx" %% "scala-util" % metamxScalaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
+    exclude("com.twitter", "finagle-core")
+    exclude("com.twitter", "finagle-http")
     force(),
   "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
+    exclude("com.twitter", "finagle-core")
+    exclude("com.twitter", "finagle-http")
     force(),
   "io.netty" % "netty" % "3.10.5.Final" force(),
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
