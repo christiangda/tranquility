@@ -13,7 +13,7 @@ concurrentRestrictions in Global += Tags.limitAll(1)
 val jacksonOneVersion = "1.9.13"
 // See https://github.com/druid-io/druid/pull/1669, https://github.com/druid-io/tranquility/pull/81 before upgrading Jackson
 val jacksonTwoVersion = "2.4.6"
-val jacksonTwoModuleScalaVersion = "2.4.5"
+val jacksonTwoModuleScalaVersion = "2.8.4"
 val druidVersion = "0.9.1.1"
 val guiceVersion = "4.0"
 val flinkVersion = "1.0.3"
@@ -81,12 +81,69 @@ val coreDependencies = Seq(
   "org.codehaus.jackson" % "jackson-mapper-asl" % jacksonOneVersion force(),
 
   // We use Jackson 2.x internally (and so does Druid).
-  "com.fasterxml.jackson.core" % "jackson-core" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion force(),
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force()
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonTwoVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonTwoVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force(),
+  "com.fasterxml.jackson.module" % "jackson-module-jaxb-annotations" % jacksonTwoModuleScalaVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("javax.validation", "validation-api")
+    exclude("com.google.code.findbugs", "jsr305")
+    exclude("net.java.dev.jets3t", "jets3t")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("log4j", "log4j")
+    force()
 ) ++ Seq(
   dependOnDruid("druid-server"),
   "com.google.inject" % "guice" % guiceVersion force(),
@@ -118,6 +175,18 @@ val stormDependencies = Seq(
   "org.apache.storm" % "storm-core" % stormVersion % "optional"
     exclude("ch.qos.logback","logback-classic")
     exclude("org.apache.logging.log4j","log4j-slf4j-impl")
+
+    exclude("com.sun.jersey","jersey-core")
+    exclude("com.sun.jersey","jersey-server")
+    exclude("com.sun.jersey.contribs","jersey-guice")
+    exclude("org.eclipse.jetty","jetty-server")
+    exclude("org.eclipse.jetty","jetty-servlets")
+    exclude("org.eclipse.jetty","jetty-util")
+    exclude("org.eclipse.jetty","jetty-io")
+    exclude("org.eclipse.jetty","jetty-http")
+    exclude("org.eclipse.jetty","jetty-client")
+    exclude("org.eclipse.jetty","jetty-continuation")
+
     force(),
   "org.slf4j" % "slf4j-api" % slf4jVersion % "optional",
   "com.twitter" %% "chill" % "0.8.1" % "optional"

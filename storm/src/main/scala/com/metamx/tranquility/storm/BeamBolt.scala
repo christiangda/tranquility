@@ -71,6 +71,8 @@ class BeamBolt[EventType](
       case e =>
         collector.synchronized {
           collector.fail(tuple)
+          log.error(e.getCause.getMessage)
+          log.error(e.getStackTrace.toString)
         }
     }
   }
