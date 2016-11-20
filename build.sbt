@@ -12,7 +12,7 @@ concurrentRestrictions in Global += Tags.limitAll(1)
 
 val jacksonOneVersion = "1.9.13"
 // See https://github.com/druid-io/druid/pull/1669, https://github.com/druid-io/tranquility/pull/81 before upgrading Jackson
-val jacksonTwoVersion = "2.4.6"
+val jacksonTwoVersion = "2.8.4"
 val jacksonTwoModuleScalaVersion = "2.8.4"
 val druidVersion = "0.9.1.1"
 val guiceVersion = "4.0"
@@ -38,6 +38,13 @@ val loggingLog4jVersion = "2.7"
 
 val javaxValidationVersion = "1.1.0.Final"
 
+val findbugsAnnotationsVersion = "3.0.1u2"
+val findbugsjsr305Version = "3.0.1"
+val ioNettyVersion = "3.10.6.Final"
+val jerseyCoreVersion = "1.19.3"
+val jerseyServerVersion = "1.19.3"
+val jerseyGuiceVersion = "1.19.3"
+
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
     exclude("org.slf4j", "slf4j-log4j12")
@@ -52,6 +59,10 @@ def dependOnDruid(artifact: String) = {
     exclude("com.google.guava", "guava")
     exclude("com.twitter", "finagle-core")
     exclude("com.twitter", "finagle-http")
+    exclude("com.fasterxml.jackson.dataformat", "jackson-dataformat-smile" )
+    exclude("com.sun.jersey","jersey-core")
+    exclude("com.sun.jersey","jersey-server")
+    exclude("com.sun.jersey.contribs","jersey-guice")
     force()
     )
 }
@@ -67,7 +78,21 @@ val coreDependencies = Seq(
     exclude("com.twitter", "finagle-core")
     exclude("com.twitter", "finagle-http")
     force(),
-  "io.netty" % "netty" % "3.10.5.Final" force(),
+
+  // Curator uses Jackson 1.x internally, and older version cause problems with service discovery.
+  "org.codehaus.jackson" % "jackson-core-asl" % jacksonOneVersion force(),
+  "org.codehaus.jackson" % "jackson-mapper-asl" % jacksonOneVersion force(),
+
+  // We use Jackson 2.x internally (and so does Druid).
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonTwoVersion force(),
+  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonTwoVersion force(),
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion force(),
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion force(),
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion force(),
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion force(),
+  "com.fasterxml.jackson.module" % "jackson-module-jaxb-annotations" % jacksonTwoModuleScalaVersion force(),
+  "io.netty" % "netty" % ioNettyVersion force(),
+  "javax.validation" % "validation-api" % javaxValidationVersion force(),
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
   "com.twitter" %% "finagle-core" % finagleVersion force(),
   "com.twitter" %% "finagle-http" % finagleVersion force(),
@@ -75,82 +100,18 @@ val coreDependencies = Seq(
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion force() force(),
   "org.apache.httpcomponents" % "httpclient" % apacheHttpVersion force(),
   "org.apache.httpcomponents" % "httpcore" % apacheHttpVersion force(),
+  "com.google.code.findbugs" % "annotations" % findbugsAnnotationsVersion force(),
+  "com.google.code.findbugs" % "jsr305" % findbugsjsr305Version force(),
+  "com.sun.jersey" % "jersey-core" % jerseyCoreVersion force(),
+  "com.sun.jersey" % "jersey-server" % jerseyServerVersion force(),
+  "com.sun.jersey.contribs" % "jersey-guice" % jerseyGuiceVersion force()
 
-  // Curator uses Jackson 1.x internally, and older version cause problems with service discovery.
-  "org.codehaus.jackson" % "jackson-core-asl" % jacksonOneVersion force(),
-  "org.codehaus.jackson" % "jackson-mapper-asl" % jacksonOneVersion force(),
-
-  // We use Jackson 2.x internally (and so does Druid).
-  "com.fasterxml.jackson.core" % "jackson-core" % jacksonTwoVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonTwoVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonTwoVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-smile" % jacksonTwoVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonTwoVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonTwoModuleScalaVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force(),
-  "com.fasterxml.jackson.module" % "jackson-module-jaxb-annotations" % jacksonTwoModuleScalaVersion
-    exclude("com.google.code.findbugs", "annotations")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("javax.validation", "validation-api")
-    exclude("com.google.code.findbugs", "jsr305")
-    exclude("net.java.dev.jets3t", "jets3t")
-    exclude("org.slf4j", "slf4j-log4j12")
-    exclude("log4j", "log4j")
-    force()
 ) ++ Seq(
   dependOnDruid("druid-server"),
   "com.google.inject" % "guice" % guiceVersion force(),
   "com.google.inject.extensions" % "guice-servlet" % guiceVersion force(),
   "com.google.inject.extensions" % "guice-multibindings" % guiceVersion force(),
-  "com.google.guava" % "guava" % googleGuavaVersion force(),
-  "javax.validation" % "validation-api" % javaxValidationVersion force()
+  "com.google.guava" % "guava" % googleGuavaVersion force()
 )
 
 val loggingDependencies = Seq(
@@ -175,18 +136,6 @@ val stormDependencies = Seq(
   "org.apache.storm" % "storm-core" % stormVersion % "optional"
     exclude("ch.qos.logback","logback-classic")
     exclude("org.apache.logging.log4j","log4j-slf4j-impl")
-
-    exclude("com.sun.jersey","jersey-core")
-    exclude("com.sun.jersey","jersey-server")
-    exclude("com.sun.jersey.contribs","jersey-guice")
-    exclude("org.eclipse.jetty","jetty-server")
-    exclude("org.eclipse.jetty","jetty-servlets")
-    exclude("org.eclipse.jetty","jetty-util")
-    exclude("org.eclipse.jetty","jetty-io")
-    exclude("org.eclipse.jetty","jetty-http")
-    exclude("org.eclipse.jetty","jetty-client")
-    exclude("org.eclipse.jetty","jetty-continuation")
-
     force(),
   "org.slf4j" % "slf4j-api" % slf4jVersion % "optional",
   "com.twitter" %% "chill" % "0.8.1" % "optional"
