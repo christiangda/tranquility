@@ -51,7 +51,7 @@ class SparkDruidTest
 
   override def beforeAll(): Unit = {
     sparkContext = new SparkContext(
-      new SparkConf().setMaster("local").setAppName("SparkDruidTest")
+      new SparkConf().setMaster("local").setAppName("SparkDruidTest").set("spark.driver.host", "127.0.0.1")
     )
     ssc = new StreamingContext(sparkContext, Seconds(3))
   }

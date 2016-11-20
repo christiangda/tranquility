@@ -20,7 +20,7 @@ val flinkVersion = "1.0.3"
 val finagleVersion = "6.31.0"
 val twitterUtilVersion = "6.30.0"
 val samzaVersion = "0.8.0"
-val sparkVersion = "1.6.0"
+val sparkVersion = "2.0.2"
 val scalatraVersion = "2.3.1"
 val jettyVersion = "9.2.5.v20141112"
 val apacheHttpVersion = "4.3.3"
@@ -33,13 +33,10 @@ val metamxJavaUtil = "0.27.11"
 val metamxScalaUtil = "1.12.5"
 val metamxEmitterVersion = "0.3.6"
 val metamxHttpClientVersion = "1.0.5"
-
 val slf4jVersion = "1.7.21"
 val logbackVersion = "1.1.7"
 val loggingLog4jVersion = "2.7"
-
 val javaxValidationVersion = "1.1.0.Final"
-
 val findbugsAnnotationsVersion = "3.0.1u2"
 val findbugsjsr305Version = "3.0.1"
 val ioNettyVersion = "3.10.6.Final"
@@ -92,7 +89,6 @@ val coreDependencies = Seq(
     exclude("com.fasterxml.jackson.module", "jackson-module-scala")
     exclude("com.metamx", "emitter")
     force(),
-
   "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
     exclude("com.twitter", "finagle-core")
@@ -103,23 +99,19 @@ val coreDependencies = Seq(
     exclude("com.fasterxml.jackson.core", "jackson-annotations")
     exclude("com.fasterxml.jackson.core", "jackson-databind")
     force(),
-
   "com.metamx" % "emitter" % metamxEmitterVersion
     exclude("com.google.guava", "guava")
     exclude("com.metamx", "java-util")
     exclude("com.metamx", "http-client")
     force(),
-
   "com.metamx" % "http-client" % metamxHttpClientVersion
     exclude("com.google.guava", "guava")
     exclude("com.metamx", "java-util")
     exclude("io.netty", "netty")
     force(),
-
   // Curator uses Jackson 1.x internally, and older version cause problems with service discovery.
   "org.codehaus.jackson" % "jackson-core-asl" % jacksonOneVersion force(),
   "org.codehaus.jackson" % "jackson-mapper-asl" % jacksonOneVersion force(),
-
   // We use Jackson 2.x internally (and so does Druid).
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonTwoVersion force(),
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonTwoVersion force(),
@@ -152,12 +144,10 @@ val coreDependencies = Seq(
     exclude("com.google.inject.extensions", "guice-servlet")
     exclude("com.google.inject", "guice")
     force(),
-
   "io.airlift" % "airline" % airlineVersion
     exclude("com.google.code.findbugs", "annotations")
     exclude("com.google.guava", "guava")
     force()
-
 ) ++ Seq(
   dependOnDruid("druid-server"),
   "com.google.inject" % "guice" % guiceVersion
