@@ -27,10 +27,12 @@ val apacheHttpVersion = "4.3.3"
 val kafkaVersion = "0.8.2.2"
 val airlineVersion = "0.7"
 val stormVersion = "1.0.2"
-//val chillVersion = "0.8.1"
+val chillVersion = "0.8.1"
 val googleGuavaVersion = "18.0"
 val metamxJavaUtil = "0.27.11"
 val metamxScalaUtil = "1.12.5"
+val metamxEmitterVersion = "0.3.6"
+val metamxHttpClientVersion = "1.0.5"
 
 val slf4jVersion = "1.7.21"
 val logbackVersion = "1.1.7"
@@ -42,6 +44,7 @@ val findbugsAnnotationsVersion = "3.0.1u2"
 val findbugsjsr305Version = "3.0.1"
 val ioNettyVersion = "3.10.6.Final"
 val jerseyVersion = "1.19.3"
+val curatorTestVersion = "3.1.0"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -54,13 +57,19 @@ def dependOnDruid(artifact: String) = {
     exclude("javax.validation", "validation-api")
     exclude("com.google.inject.extensions", "guice-servlet")
     exclude("com.google.inject.extensions", "guice-multibindings")
+    exclude("com.google.inject", "guice")
     exclude("com.google.guava", "guava")
+    exclude("com.google.code.findbugs", "jsr305")
     exclude("com.twitter", "finagle-core")
     exclude("com.twitter", "finagle-http")
     exclude("com.fasterxml.jackson.dataformat", "jackson-dataformat-smile" )
     exclude("com.sun.jersey","jersey-core")
     exclude("com.sun.jersey","jersey-server")
     exclude("com.sun.jersey.contribs","jersey-guice")
+    exclude("com.metamx", "server-metrics")
+    exclude("com.metamx", "http-client")
+    exclude("io.airlift", "airline")
+    exclude("com.fasterxml.jackson.module", "jackson-module-scala")
     force()
     )
 }
@@ -81,7 +90,9 @@ val coreDependencies = Seq(
     exclude("com.fasterxml.jackson.core", "jackson-databind")
     exclude("com.fasterxml.jackson.dataformat", "jackson-dataformat-smile")
     exclude("com.fasterxml.jackson.module", "jackson-module-scala")
+    exclude("com.metamx", "emitter")
     force(),
+
   "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
     exclude("com.twitter", "finagle-core")
@@ -91,6 +102,18 @@ val coreDependencies = Seq(
     exclude("com.fasterxml.jackson.core", "jackson-core")
     exclude("com.fasterxml.jackson.core", "jackson-annotations")
     exclude("com.fasterxml.jackson.core", "jackson-databind")
+    force(),
+
+  "com.metamx" % "emitter" % metamxEmitterVersion
+    exclude("com.google.guava", "guava")
+    exclude("com.metamx", "java-util")
+    exclude("com.metamx", "http-client")
+    force(),
+
+  "com.metamx" % "http-client" % metamxHttpClientVersion
+    exclude("com.google.guava", "guava")
+    exclude("com.metamx", "java-util")
+    exclude("io.netty", "netty")
     force(),
 
   // Curator uses Jackson 1.x internally, and older version cause problems with service discovery.
@@ -108,23 +131,45 @@ val coreDependencies = Seq(
   "io.netty" % "netty" % ioNettyVersion force(),
   "javax.validation" % "validation-api" % javaxValidationVersion force(),
   "com.twitter" %% "util-core" % twitterUtilVersion force(),
-  "com.twitter" %% "finagle-core" % finagleVersion force(),
-  "com.twitter" %% "finagle-http" % finagleVersion force(),
+  "com.twitter" %% "finagle-core" % finagleVersion
+    exclude("com.google.guava", "guava")
+    exclude("io.netty", "netty")
+    force(),
+  "com.twitter" %% "finagle-http" % finagleVersion
+    exclude("com.google.guava", "guava")
+    force(),
   "org.slf4j" % "slf4j-api" % slf4jVersion force() force(),
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion force() force(),
   "org.apache.httpcomponents" % "httpclient" % apacheHttpVersion force(),
   "org.apache.httpcomponents" % "httpcore" % apacheHttpVersion force(),
-  "com.google.code.findbugs" % "annotations" % findbugsAnnotationsVersion force(),
+  "com.google.code.findbugs" % "annotations" % findbugsAnnotationsVersion
+    exclude("com.google.code.findbugs", "jsr305")
+    force(),
   "com.google.code.findbugs" % "jsr305" % findbugsjsr305Version force(),
   "com.sun.jersey" % "jersey-core" % jerseyVersion force(),
   "com.sun.jersey" % "jersey-server" % jerseyVersion force(),
-  "com.sun.jersey.contribs" % "jersey-guice" % jerseyVersion force()
+  "com.sun.jersey.contribs" % "jersey-guice" % jerseyVersion
+    exclude("com.google.inject.extensions", "guice-servlet")
+    exclude("com.google.inject", "guice")
+    force(),
+
+  "io.airlift" % "airline" % airlineVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.guava", "guava")
+    force()
 
 ) ++ Seq(
   dependOnDruid("druid-server"),
-  "com.google.inject" % "guice" % guiceVersion force(),
+  "com.google.inject" % "guice" % guiceVersion
+    exclude("com.google.guava", "guava")
+    force(),
+  "com.google.inject.extensions" % "guice-servlet" % guiceVersion
+    exclude("com.google.inject", "guice")
+    force(),
+  "com.google.inject.extensions" % "guice-multibindings" % guiceVersion
+    exclude("com.google.inject", "guice")
+    force(),
   "com.google.inject.extensions" % "guice-servlet" % guiceVersion force(),
-  "com.google.inject.extensions" % "guice-multibindings" % guiceVersion force(),
   "com.google.guava" % "guava" % googleGuavaVersion force()
 )
 
@@ -134,6 +179,7 @@ val loggingDependencies = Seq(
   "org.apache.logging.log4j" % "log4j-to-slf4j" % loggingLog4jVersion,
   "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion,
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % loggingLog4jVersion,
+  "org.apache.logging.log4j" % "log4j-core" % loggingLog4jVersion,
   "org.slf4j" % "log4j-over-slf4j" % slf4jVersion,
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion
 )
@@ -149,16 +195,14 @@ def flinkDependencies(scalaVersion: String) = {
 
 val stormDependencies = Seq(
   "org.apache.storm" % "storm-core" % stormVersion % "optional"
-    exclude("org.apache.logging.log4j","log4j-slf4j-impl")
-    exclude("org.apache.logging.log4j","log4j-api")
+    exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
+    exclude("org.apache.logging.log4j", "log4j-api")
+    exclude("org.apache.logging.log4j", "log4j-core")
     exclude("org.slf4j", "slf4j-api")
     exclude("org.slf4j", "log4j-over-slf4j")
+    exclude("org.apache.curator", "curator-test")
     force(),
-  //"com.twitter" %% "chill" % "0.8.1" % "optional"
-  "org.slf4j" % "slf4j-api" % slf4jVersion % "optional",
-  "org.slf4j" % "og4j-over-slf4j" % slf4jVersion % "optional",
-  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion,
-  "org.apache.logging.log4j" % "log4j-slf4j-impl" % loggingLog4jVersion
+  "com.twitter" %% "chill" % chillVersion
 )
 
 val samzaDependencies = Seq(
@@ -185,12 +229,18 @@ val kafkaDependencies = Seq(
     exclude("log4j", "log4j")
     force(),
   "io.airlift" % "airline" % airlineVersion
+    exclude("com.google.code.findbugs", "annotations")
+    exclude("com.google.guava", "guava")
+    force()
+
 ) ++ loggingDependencies
 
 val coreTestDependencies = Seq(
   "org.scalatest" %% "scalatest" % "2.2.5" % "test",
   dependOnDruid("druid-services") % "test",
-  "org.apache.curator" % "curator-test" % "2.11.0" % "test" exclude("log4j", "log4j") force(),
+  "org.apache.curator" % "curator-test" % curatorTestVersion % "test"
+    exclude("log4j", "log4j")
+    force(),
   "com.sun.jersey" % "jersey-servlet" % "1.17.1" % "test" force(),
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test",
