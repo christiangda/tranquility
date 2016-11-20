@@ -27,10 +27,10 @@ val apacheHttpVersion = "4.3.3"
 val kafkaVersion = "0.8.2.2"
 val airlineVersion = "0.7"
 val stormVersion = "1.0.2"
-val chillVersion = "0.8.1"
+//val chillVersion = "0.8.1"
 val googleGuavaVersion = "18.0"
-val metamxJavaUtil = "0.27.9"
-val metamxScalaUtil = "1.11.6"
+val metamxJavaUtil = "0.27.11"
+val metamxScalaUtil = "1.12.5"
 
 val slf4jVersion = "1.7.21"
 val logbackVersion = "1.1.7"
@@ -41,9 +41,7 @@ val javaxValidationVersion = "1.1.0.Final"
 val findbugsAnnotationsVersion = "3.0.1u2"
 val findbugsjsr305Version = "3.0.1"
 val ioNettyVersion = "3.10.6.Final"
-val jerseyCoreVersion = "1.19.3"
-val jerseyServerVersion = "1.19.3"
-val jerseyGuiceVersion = "1.19.3"
+val jerseyVersion = "1.19.3"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
@@ -70,13 +68,29 @@ def dependOnDruid(artifact: String) = {
 val coreDependencies = Seq(
   "com.metamx" %% "scala-util" % metamxScalaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
+    exclude("com.twitter", "util-core")
     exclude("com.twitter", "finagle-core")
     exclude("com.twitter", "finagle-http")
+    exclude("com.metamx", "java-util")
+    exclude("org.slf4j", "slf4j-api")
+    exclude("io.netty", "netty")
+    exclude("com.google.guava", "guava")
+    exclude("com.fasterxml.jackson.datatype", "jackson-datatype-joda")
+    exclude("com.fasterxml.jackson.core", "jackson-core")
+    exclude("com.fasterxml.jackson.core", "jackson-annotations")
+    exclude("com.fasterxml.jackson.core", "jackson-databind")
+    exclude("com.fasterxml.jackson.dataformat", "jackson-dataformat-smile")
+    exclude("com.fasterxml.jackson.module", "jackson-module-scala")
     force(),
   "com.metamx" % "java-util" % metamxJavaUtil exclude("log4j", "log4j")
     exclude("javax.validation", "validation-api")
     exclude("com.twitter", "finagle-core")
     exclude("com.twitter", "finagle-http")
+    exclude("org.slf4j", "slf4j-api")
+    exclude("com.google.guava", "guava")
+    exclude("com.fasterxml.jackson.core", "jackson-core")
+    exclude("com.fasterxml.jackson.core", "jackson-annotations")
+    exclude("com.fasterxml.jackson.core", "jackson-databind")
     force(),
 
   // Curator uses Jackson 1.x internally, and older version cause problems with service discovery.
@@ -102,9 +116,9 @@ val coreDependencies = Seq(
   "org.apache.httpcomponents" % "httpcore" % apacheHttpVersion force(),
   "com.google.code.findbugs" % "annotations" % findbugsAnnotationsVersion force(),
   "com.google.code.findbugs" % "jsr305" % findbugsjsr305Version force(),
-  "com.sun.jersey" % "jersey-core" % jerseyCoreVersion force(),
-  "com.sun.jersey" % "jersey-server" % jerseyServerVersion force(),
-  "com.sun.jersey.contribs" % "jersey-guice" % jerseyGuiceVersion force()
+  "com.sun.jersey" % "jersey-core" % jerseyVersion force(),
+  "com.sun.jersey" % "jersey-server" % jerseyVersion force(),
+  "com.sun.jersey.contribs" % "jersey-guice" % jerseyVersion force()
 
 ) ++ Seq(
   dependOnDruid("druid-server"),
@@ -119,6 +133,7 @@ val loggingDependencies = Seq(
   "ch.qos.logback" % "logback-classic" % logbackVersion,
   "org.apache.logging.log4j" % "log4j-to-slf4j" % loggingLog4jVersion,
   "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion,
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % loggingLog4jVersion,
   "org.slf4j" % "log4j-over-slf4j" % slf4jVersion,
   "org.slf4j" % "jul-to-slf4j" % slf4jVersion
 )
@@ -134,11 +149,16 @@ def flinkDependencies(scalaVersion: String) = {
 
 val stormDependencies = Seq(
   "org.apache.storm" % "storm-core" % stormVersion % "optional"
-    exclude("ch.qos.logback","logback-classic")
     exclude("org.apache.logging.log4j","log4j-slf4j-impl")
+    exclude("org.apache.logging.log4j","log4j-api")
+    exclude("org.slf4j", "slf4j-api")
+    exclude("org.slf4j", "log4j-over-slf4j")
     force(),
+  //"com.twitter" %% "chill" % "0.8.1" % "optional"
   "org.slf4j" % "slf4j-api" % slf4jVersion % "optional",
-  "com.twitter" %% "chill" % "0.8.1" % "optional"
+  "org.slf4j" % "og4j-over-slf4j" % slf4jVersion % "optional",
+  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion,
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % loggingLog4jVersion
 )
 
 val samzaDependencies = Seq(
@@ -177,9 +197,7 @@ val coreTestDependencies = Seq(
   "ch.qos.logback" % "logback-core" % logbackVersion % "test",
   "ch.qos.logback" % "logback-classic" % logbackVersion % "test",
   "org.apache.logging.log4j" % "log4j-to-slf4j" % loggingLog4jVersion % "test",
-  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion % "test",
-  "org.slf4j" % "log4j-over-slf4j" % slf4jVersion % "test",
-  "org.slf4j" % "jul-to-slf4j" % slf4jVersion % "test"
+  "org.apache.logging.log4j" % "log4j-api" % loggingLog4jVersion % "test"
 ) ++ loggingDependencies.map(_ % "test")
 
 def flinkTestDependencies(scalaVersion: String) = {
