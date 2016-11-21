@@ -1,1 +1,1 @@
-version in ThisBuild := "0.8.3-txrlabs-1"
+version in ThisBuild := "0.8.3-SNAPSHOT"
