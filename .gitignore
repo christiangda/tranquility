@@ -15,3 +15,5 @@ dist/
 */derby.log
 */var/druid/metadata.db/*
 */druid-tasks
+*.graphml
+*.dot
