@@ -10,6 +10,7 @@ parallelExecution in Test := false
 
 concurrentRestrictions in Global += Tags.limitAll(1)
 
+
 val jacksonOneVersion = "1.9.13"
 // See https://github.com/druid-io/druid/pull/1669, https://github.com/druid-io/tranquility/pull/81 before upgrading Jackson
 val jacksonTwoVersion = "2.8.4"
@@ -185,15 +186,11 @@ def flinkDependencies(scalaVersion: String) = {
 
 val stormDependencies = Seq(
   "org.apache.storm" % "storm-core" % stormVersion % "optional"
-    exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
-    exclude("org.apache.logging.log4j", "log4j-api")
-    exclude("org.apache.logging.log4j", "log4j-core")
     exclude("org.slf4j", "slf4j-api")
     exclude("org.slf4j", "log4j-over-slf4j")
-    exclude("org.apache.curator", "curator-test")
+    exclude("ch.qos.logback", "logback-classic")
     force(),
-  "com.twitter" %% "chill" % chillVersion
-)
+  "com.twitter" %% "chill" % chillVersion)
 
 val samzaDependencies = Seq(
   "org.apache.samza" % "samza-api" % samzaVersion % "optional"
