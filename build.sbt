@@ -42,7 +42,7 @@ val findbugsAnnotationsVersion = "3.0.1u2"
 val findbugsjsr305Version = "3.0.1"
 val ioNettyVersion = "3.10.6.Final"
 val jerseyVersion = "1.19.3"
-val curatorTestVersion = "3.1.0"
+val curatorTestVersion = "2.11.1"
 
 def dependOnDruid(artifact: String) = {
   ("io.druid" % artifact % druidVersion
